@@ -1,35 +1,37 @@
 package ar.com.flow.akka.binary.tree
 
-import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext}
-import ar.com.flow.akka.binary.tree.BinaryTree.NodeState
+import akka.actor.typed.{ActorRef, Behavior}
+import BinaryTree._
 
 class Node(context: ActorContext[BinaryTree.Command],
            var value: Int = 0,
-           var leftChild: Option[NodeState] = None,
-           var rightChild: Option[NodeState] = None
+           var leftChildState: Option[NodeState] = None,
+           var rightChildState: Option[NodeState] = None
           )
   extends AbstractBehavior[BinaryTree.Command](context) {
-  import BinaryTree._
+
+  var leftChild: Option[ActorRef[Command]] = None
+  var rightChild: Option[ActorRef[Command]] = None
 
   override def onMessage(message: BinaryTree.Command): Behavior[BinaryTree.Command] = {
     message match {
       case Depth(replyTo) =>
         replyTo ! DepthReply(1)
         this
-      case AddLeftChild(newValue, newLeftChild, newRightChild, replyTo) =>
-        leftChild = Some(NodeState(newValue, None, None))
-        replyTo ! NodeState(newValue, newLeftChild, newRightChild)
+      case AddLeftChild(newValue, newLeftChild, newRightChild) =>
+        leftChild = Some(context.spawn(BinaryTree(newValue, newLeftChild, newRightChild), "left"))
+        leftChildState = Some(NodeState(newValue, newLeftChild, newRightChild))
         this
       case LeftChild(replyTo) =>
-        replyTo ! leftChild.getOrElse(EmptyNodeState())
+        replyTo ! leftChildState.getOrElse(EmptyNodeState())
         this
-      case AddRightChild(newValue, newLeftChild, newRightChild, replyTo) =>
-        rightChild = Some(NodeState(newValue, None, None))
-        replyTo ! NodeState(newValue, newLeftChild, newRightChild)
+      case AddRightChild(newValue, newLeftChild, newRightChild) =>
+        rightChild = Some(context.spawn(BinaryTree(newValue, newLeftChild, newRightChild), "right"))
+        rightChildState = Some(NodeState(newValue, newLeftChild, newRightChild))
         this
       case RightChild(replyTo) =>
-        replyTo ! rightChild.getOrElse(EmptyNodeState())
+        replyTo ! rightChildState.getOrElse(EmptyNodeState())
         this
       case Value(replyTo) =>
         replyTo ! ValueReply(value)

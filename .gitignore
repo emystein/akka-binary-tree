@@ -10,3 +10,5 @@ target/
 .metals
 .bloop
 .bsp
+
+.attach_pid*

@@ -33,22 +33,22 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
       replyProbe.expectMessage(ValueReply(1))
     }
     "have Left child" in {
-      val replyProbe = createTestProbe[NodeState]()
       val tree = spawn(BinaryTree(value = 1))
-      tree ! AddLeftChild(value = 2, leftChild=None, rightChild = None, replyProbe.ref)
-      replyProbe.expectMessage(NodeState(2, None, None))
+      tree ! AddLeftChild(value = 2, leftChild=None, rightChild = None)
+
       val leftChildReplyProbe = createTestProbe[NodeState]()
       tree ! LeftChild(leftChildReplyProbe.ref)
+
       val leftChild = NodeState(value = 2, None, None)
       leftChildReplyProbe.expectMessage(leftChild)
     }
     "have Right child" in {
-      val replyProbe = createTestProbe[NodeState]()
       val tree = spawn(BinaryTree(value = 1))
-      tree ! AddRightChild(value = 2, leftChild = None, rightChild = None, replyProbe.ref)
-      replyProbe.expectMessage(NodeState(2, None, None))
+      tree ! AddRightChild(value = 2, leftChild = None, rightChild = None)
+
       val childReplyProbe = createTestProbe[NodeState]()
       tree ! RightChild(childReplyProbe.ref)
+
       val rightChild = NodeState(value = 2, None, None)
       childReplyProbe.expectMessage(rightChild)
     }

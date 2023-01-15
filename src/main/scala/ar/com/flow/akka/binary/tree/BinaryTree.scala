@@ -9,9 +9,9 @@ object BinaryTree {
   final case class Depth(replyTo: ActorRef[DepthReply]) extends Command
   final case class DepthReply(depth: Int) extends Command
 
-  final case class AddLeftChild(value: Int, leftChild: Option[NodeState], rightChild: Option[NodeState], replyTo: ActorRef[NodeState]) extends Command
+  final case class AddLeftChild(value: Int, leftChild: Option[NodeState], rightChild: Option[NodeState]) extends Command
   final case class LeftChild(replyTo: ActorRef[NodeState]) extends Command
-  final case class AddRightChild(value: Int, leftChild: Option[NodeState], rightChild: Option[NodeState], replyTo: ActorRef[NodeState]) extends Command
+  final case class AddRightChild(value: Int, leftChild: Option[NodeState], rightChild: Option[NodeState]) extends Command
   final case class RightChild(replyTo: ActorRef[NodeState]) extends Command
 
   final case class NodeState(value: Int, leftChild: Option[NodeState], rightChild: Option[NodeState]) extends Command
@@ -22,5 +22,8 @@ object BinaryTree {
   final case class Value(replyTo: ActorRef[ValueReply]) extends Command
   final case class ValueReply(value: Int) extends Command
 
-  def apply(value: Int = 0, leftChild: Option[NodeState] = None, rightChild: Option[NodeState] = None): Behavior[Command] = Behaviors.setup(context => new Node(context, value, leftChild, rightChild))
+  def apply(value: Int = 0,
+            leftChild: Option[NodeState] = None,
+            rightChild: Option[NodeState] = None): Behavior[Command] =
+    Behaviors.setup(context => new Node(context, value, leftChild, rightChild))
 }
