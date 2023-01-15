@@ -22,5 +22,5 @@ object BinaryTree {
   final case class Value(replyTo: ActorRef[ValueReply]) extends Command
   final case class ValueReply(value: Int) extends Command
 
-  def apply(value: Int = 0): Behavior[Command] = Behaviors.setup(context => new Node(context, value))
+  def apply(value: Int = 0, leftChild: Option[NodeState] = None, rightChild: Option[NodeState] = None): Behavior[Command] = Behaviors.setup(context => new Node(context, value, leftChild, rightChild))
 }

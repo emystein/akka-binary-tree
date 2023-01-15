@@ -2,14 +2,15 @@ package ar.com.flow.akka.binary.tree
 
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext}
+import ar.com.flow.akka.binary.tree.BinaryTree.NodeState
 
 class Node(context: ActorContext[BinaryTree.Command],
-           var value: Int = 0)
+           var value: Int = 0,
+           var leftChild: Option[NodeState] = None,
+           var rightChild: Option[NodeState] = None
+          )
   extends AbstractBehavior[BinaryTree.Command](context) {
   import BinaryTree._
-
-  var leftChild: Option[NodeState] = None
-  var rightChild: Option[NodeState] = None
 
   override def onMessage(message: BinaryTree.Command): Behavior[BinaryTree.Command] = {
     message match {
@@ -24,11 +25,11 @@ class Node(context: ActorContext[BinaryTree.Command],
         replyTo ! leftChild.getOrElse(EmptyNodeState())
         this
       case AddRightChild(newValue, newLeftChild, newRightChild, replyTo) =>
-        leftChild = Some(NodeState(newValue, None, None))
+        rightChild = Some(NodeState(newValue, None, None))
         replyTo ! NodeState(newValue, newLeftChild, newRightChild)
         this
       case RightChild(replyTo) =>
-        replyTo ! leftChild.getOrElse(EmptyNodeState())
+        replyTo ! rightChild.getOrElse(EmptyNodeState())
         this
       case Value(replyTo) =>
         replyTo ! ValueReply(value)
