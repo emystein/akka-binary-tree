@@ -43,20 +43,20 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
       val tree = spawn(BinaryTree(value = 1))
 
       val replyProbe = createTestProbe[ReturnedNode]()
-      tree ! AddLeftChild(replyProbe.ref, Node(value = 2, leftChild=None, rightChild = None))
+      tree ! AddLeftChild(replyProbe.ref, Leaf(value = 2))
       expectLeftValue(tree, 2)
     }
     "have added Right child" in {
       val tree = spawn(BinaryTree(value = 1))
 
       val replyProbe = createTestProbe[ReturnedNode]()
-      tree ! AddRightChild(replyProbe.ref, Node(value = 3, leftChild = None, rightChild = None))
+      tree ! AddRightChild(replyProbe.ref, Leaf(value = 3))
       expectRightValue(tree, 3)
     }
     "have Left child path" in {
       val treeActor = BinaryTree(value = 1,
-        leftChild = Some(Node(2, None, None)),
-        rightChild = Some(Node(3, None, None))
+        leftChild = Some(Leaf(value = 2)),
+        rightChild = Some(Leaf(value = 3))
       )
 
       val tree = spawn(treeActor)
@@ -71,9 +71,9 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
     }
     "have Left/Left child path" in {
       val treeBehavior = BinaryTree(value = 1,
-        leftChild = Some(Node(2,
-          leftChild = Some(Node(3, None, None)),
-          rightChild = None)),
+        leftChild = Some(Node(value = 2,
+                              leftChild = Some(Leaf(value = 3)),
+                              rightChild = None)),
         rightChild = None)
 
       val tree = spawn(treeBehavior)
@@ -91,9 +91,9 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
     }
     "have Left/right child path" in {
       val treeBehavior = BinaryTree(value = 1,
-        leftChild = Some(Node(2,
-          leftChild = None,
-          rightChild = Some(Node(3, None, None)),
+        leftChild = Some(Node(value = 2,
+                              leftChild = None,
+                              rightChild = Some(Leaf(value = 3)),
         )),
         rightChild = None)
 
@@ -122,8 +122,8 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
   "A Child Node" must {
     "have parent" in {
       val treeBehavior = BinaryTree(value = 1,
-        leftChild = Some(Node(2, None, None)),
-        rightChild = Some(Node(3, None, None))
+        leftChild = Some(Leaf(value = 2)),
+        rightChild = Some(Leaf(value = 3))
       )
 
       val tree = spawn(treeBehavior)
@@ -135,14 +135,14 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
   "A Binary Tree" must {
     "construct with Left and Right children" in {
       val treeBehavior = BinaryTree(value = 1,
-        leftChild = Some(Node(2, None, None)),
-        rightChild = Some(Node(3, None, None))
+        leftChild = Some(Leaf(value = 2)),
+        rightChild = Some(Leaf(value = 3))
       )
 
       val tree = spawn(treeBehavior)
 
-      expectLeftValue(tree, 2)
-      expectRightValue(tree, 3)
+      expectLeftValue(tree, expectedValue = 2)
+      expectRightValue(tree, expectedValue = 3)
     }
   }
 

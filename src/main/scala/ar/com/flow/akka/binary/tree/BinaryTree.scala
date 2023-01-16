@@ -22,7 +22,11 @@ object BinaryTree {
   final case class Depth(replyTo: ActorRef[ReturnedDepth]) extends Command
   final case class ReturnedDepth(depth: Int) extends Command
 
-  final case class Node(value: Int, leftChild: Option[Node], rightChild: Option[Node])
+  final case class Node(value: Int, leftChild: Option[Node] = None, rightChild: Option[Node] = None)
+
+  object Leaf {
+    def apply(value: Int): Node = Node(value)
+  }
 
   def apply(name: String = "",
             value: Int = 0,
