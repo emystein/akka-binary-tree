@@ -6,7 +6,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 object BinaryTree {
   sealed trait Command
 
-  final case class Path(replyTo: ActorRef[PathReply]) extends Command
+  final case class Path(replyTo: ActorRef[PathReply], collectedPath: Option[String] = None) extends Command
   final case class PathReply(path: String) extends Command
 
   final case class Depth(replyTo: ActorRef[DepthReply]) extends Command
@@ -24,9 +24,10 @@ object BinaryTree {
   final case class Value(replyTo: ActorRef[ValueReply]) extends Command
   final case class ValueReply(value: Int) extends Command
 
-  def apply(value: Int = 0,
+  def apply(name: String = "",
+            value: Int = 0,
             parent: Option[ActorRef[Command]] = None,
             leftChild: Option[NodeState] = None,
             rightChild: Option[NodeState] = None): Behavior[Command] =
-    Behaviors.setup(context => new Node(context, value, parent, leftChild, rightChild))
+    Behaviors.setup(context => new Node(context, name, value, parent, leftChild, rightChild))
 }
