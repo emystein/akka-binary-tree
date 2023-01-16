@@ -8,30 +8,29 @@ import ar.com.flow.akka.binary.tree.BinaryTreePath.TreePath
 object LeftNode {
   def apply(context: ActorContext[BinaryTree.Command], value: Int = 0,
             parent: Option[ActorRef[BinaryTree.Command]] = None,
-            leftChildState: Option[BinaryTree.Node] = None,
-            rightChildState: Option[BinaryTree.Node] = None) =
-    new NodeBehavior(context, name = "left", value, parent, leftChildState, rightChildState)
+            leftChild: Option[BinaryTree.Node] = None,
+            rightChild: Option[BinaryTree.Node] = None) =
+    new NodeBehavior(context, name = "left", value, parent, leftChild, rightChild)
 }
 
 object RightNode {
   def apply(context: ActorContext[BinaryTree.Command], value: Int = 0,
             parent: Option[ActorRef[BinaryTree.Command]] = None,
-            leftChildState: Option[BinaryTree.Node] = None,
-            rightChildState: Option[BinaryTree.Node] = None) =
-    new NodeBehavior(context, name = "right", value, parent, leftChildState, rightChildState)
+            leftChild: Option[BinaryTree.Node] = None,
+            rightChild: Option[BinaryTree.Node] = None) =
+    new NodeBehavior(context, name = "right", value, parent, leftChild, rightChild)
 }
 
 class NodeBehavior(context: ActorContext[BinaryTree.Command],
-           val name: String = "",
-           var value: Int = 0,
-           var parent: Option[ActorRef[BinaryTree.Command]] = None,
-           leftChildState: Option[BinaryTree.Node] = None,
-           rightChildState: Option[BinaryTree.Node] = None
-          )
+                   val name: String = "",
+                   var value: Int = 0,
+                   val parent: Option[ActorRef[BinaryTree.Command]] = None,
+                   initialLeftChild: Option[BinaryTree.Node] = None,
+                   initialRightChild: Option[BinaryTree.Node] = None)
   extends AbstractBehavior[BinaryTree.Command](context) {
 
-  var leftChild: Option[ActorRef[Command]] = leftChildState.map(s => spawnLeftChild(s.value, s.leftChild, s.rightChild))
-  var rightChild: Option[ActorRef[Command]] = rightChildState.map(s => spawnRightChild(s.value, s.leftChild, s.rightChild))
+  var leftChild: Option[ActorRef[Command]] = initialLeftChild.map(s => spawnLeftChild(s.value, s.leftChild, s.rightChild))
+  var rightChild: Option[ActorRef[Command]] = initialRightChild.map(s => spawnRightChild(s.value, s.leftChild, s.rightChild))
 
   override def onMessage(message: BinaryTree.Command): Behavior[BinaryTree.Command] = {
     message match {
