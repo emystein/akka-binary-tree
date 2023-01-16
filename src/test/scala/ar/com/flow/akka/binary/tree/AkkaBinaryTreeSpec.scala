@@ -34,10 +34,10 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
   }
   "A Node" must {
     "have value" in {
-      val replyProbe = createTestProbe[ValueReply]()
+      val replyProbe = createTestProbe[ValueReturned]()
       val tree = spawn(BinaryTree(value=1))
       tree ! Value(replyProbe.ref)
-      replyProbe.expectMessage(ValueReply(1))
+      replyProbe.expectMessage(ValueReturned(1))
     }
     "have added Left child" in {
       val tree = spawn(BinaryTree(value = 1))
@@ -161,9 +161,9 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
   private def expectNodeValue(tree: ActorRef[Command], childMessage: Command, childReplyProbe: TestProbe[NodeReturned], expectedValue: Int) = {
     tree ! childMessage
     val rightChild = childReplyProbe.receiveMessage()
-    val rightValueReply = createTestProbe[ValueReply]()
+    val rightValueReply = createTestProbe[ValueReturned]()
     rightChild.node.get ! Value(rightValueReply.ref)
-    rightValueReply.expectMessage(ValueReply(expectedValue))
+    rightValueReply.expectMessage(ValueReturned(expectedValue))
   }
 
   private def expectLeftHasParent(tree: ActorRef[Command]): Unit = {

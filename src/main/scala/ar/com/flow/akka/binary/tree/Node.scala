@@ -60,7 +60,7 @@ class Node(context: ActorContext[BinaryTree.Command],
         replyTo ! NodeReturned(rightChild)
         this
       case Value(replyTo) =>
-        replyTo ! ValueReply(value)
+        replyTo ! ValueReturned(value)
         this
     }
   }

@@ -21,8 +21,8 @@ object BinaryTree {
   final case class NodeState(value: Int, leftChild: Option[NodeState], rightChild: Option[NodeState]) extends Command
   final case class NodeReturned(node: Option[ActorRef[Command]]) extends Command
 
-  final case class Value(replyTo: ActorRef[ValueReply]) extends Command
-  final case class ValueReply(value: Int) extends Command
+  final case class Value(replyTo: ActorRef[ValueReturned]) extends Command
+  final case class ValueReturned(value: Int) extends Command
 
   def apply(name: String = "",
             value: Int = 0,
