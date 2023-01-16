@@ -29,8 +29,8 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
                    initialRightChild: Option[BinaryTree.Node] = None)
   extends AbstractBehavior[BinaryTree.Command](context) {
 
-  var leftChild: Option[ActorRef[Command]] = initialLeftChild.map(s => spawnLeftChild(s.value, s.leftChild, s.rightChild))
-  var rightChild: Option[ActorRef[Command]] = initialRightChild.map(s => spawnRightChild(s.value, s.leftChild, s.rightChild))
+  var leftChild: Option[ActorRef[Command]] = initialLeftChild.map(spawnLeftChild)
+  var rightChild: Option[ActorRef[Command]] = initialRightChild.map(spawnRightChild)
 
   override def onMessage(message: BinaryTree.Command): Behavior[BinaryTree.Command] = {
     message match {
@@ -44,15 +44,15 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
       case Parent(replyTo) =>
         replyTo ! ReturnedNode(parent)
         this
-      case AddLeftChild(replyTo, newValue, newLeftChild, newRightChild) =>
-        leftChild = Some(spawnLeftChild(newValue, newLeftChild, newRightChild))
+      case AddLeftChild(replyTo, newLeftChild) =>
+        leftChild = Some(spawnLeftChild(newLeftChild))
         replyTo ! ReturnedNode(leftChild)
         this
       case LeftChild(replyTo) =>
         replyTo ! ReturnedNode(leftChild)
         this
-      case AddRightChild(replyTo, newValue, newLeftChild, newRightChild) =>
-        rightChild = Some(spawnRightChild(newValue, newLeftChild, newRightChild))
+      case AddRightChild(replyTo, newRightChild) =>
+        rightChild = Some(spawnRightChild(newRightChild))
         replyTo ! ReturnedNode(rightChild)
         this
       case RightChild(replyTo) =>
@@ -64,11 +64,11 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
     }
   }
 
-  private def spawnRightChild(value: Int, leftChild: Option[BinaryTree.Node], rightChild: Option[BinaryTree.Node]) = {
-    context.spawn(BinaryTree.right(value, parent = Some(context.self), leftChild, rightChild), "right")
+  private def spawnLeftChild(leftChild: BinaryTree.Node) = {
+    context.spawn(BinaryTree.left(leftChild.value, parent = Some(context.self), leftChild.leftChild, leftChild.rightChild), "left")
   }
 
-  private def spawnLeftChild(value: Int, leftChild: Option[BinaryTree.Node], rightChild: Option[BinaryTree.Node]) = {
-    context.spawn(BinaryTree.left(value, parent = Some(context.self), leftChild, rightChild), "left")
+  private def spawnRightChild(rightChild: BinaryTree.Node) = {
+    context.spawn(BinaryTree.right(rightChild.value, parent = Some(context.self), rightChild.leftChild, rightChild.rightChild), "right")
   }
 }

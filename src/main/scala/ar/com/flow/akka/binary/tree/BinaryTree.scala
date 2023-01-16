@@ -7,9 +7,9 @@ object BinaryTree {
   sealed trait Command
 
   final case class Parent(replyTo: ActorRef[ReturnedNode]) extends Command
-  final case class AddLeftChild(replyTo: ActorRef[ReturnedNode], value: Int, leftChild: Option[Node], rightChild: Option[Node]) extends Command
+  final case class AddLeftChild(replyTo: ActorRef[ReturnedNode], leftChild: Node) extends Command
   final case class LeftChild(replyTo: ActorRef[ReturnedNode]) extends Command
-  final case class AddRightChild(replyTo: ActorRef[ReturnedNode], value: Int, leftChild: Option[Node], rightChild: Option[Node]) extends Command
+  final case class AddRightChild(replyTo: ActorRef[ReturnedNode], leftChild: Node) extends Command
   final case class RightChild(replyTo: ActorRef[ReturnedNode]) extends Command
   final case class ReturnedNode(node: Option[ActorRef[Command]]) extends Command
 
