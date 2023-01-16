@@ -7,26 +7,26 @@ import ar.com.flow.akka.binary.tree.BinaryTreePath.TreePath
 
 object LeftNode {
   def apply(context: ActorContext[BinaryTree.Command], value: Int = 0,
-            parent: Option[ActorRef[Command]] = None,
-            leftChildState: Option[NodeState] = None,
-            rightChildState: Option[NodeState] = None) =
-    new Node(context, name = "left", value, parent, leftChildState, rightChildState)
+            parent: Option[ActorRef[BinaryTree.Command]] = None,
+            leftChildState: Option[BinaryTree.Node] = None,
+            rightChildState: Option[BinaryTree.Node] = None) =
+    new NodeBehavior(context, name = "left", value, parent, leftChildState, rightChildState)
 }
 
 object RightNode {
   def apply(context: ActorContext[BinaryTree.Command], value: Int = 0,
-            parent: Option[ActorRef[Command]] = None,
-            leftChildState: Option[NodeState] = None,
-            rightChildState: Option[NodeState] = None) =
-    new Node(context, name = "right", value, parent, leftChildState, rightChildState)
+            parent: Option[ActorRef[BinaryTree.Command]] = None,
+            leftChildState: Option[BinaryTree.Node] = None,
+            rightChildState: Option[BinaryTree.Node] = None) =
+    new NodeBehavior(context, name = "right", value, parent, leftChildState, rightChildState)
 }
 
-class Node(context: ActorContext[BinaryTree.Command],
+class NodeBehavior(context: ActorContext[BinaryTree.Command],
            val name: String = "",
            var value: Int = 0,
-           var parent: Option[ActorRef[Command]] = None,
-           leftChildState: Option[NodeState] = None,
-           rightChildState: Option[NodeState] = None
+           var parent: Option[ActorRef[BinaryTree.Command]] = None,
+           leftChildState: Option[BinaryTree.Node] = None,
+           rightChildState: Option[BinaryTree.Node] = None
           )
   extends AbstractBehavior[BinaryTree.Command](context) {
 
@@ -65,11 +65,11 @@ class Node(context: ActorContext[BinaryTree.Command],
     }
   }
 
-  private def spawnRightChild(newValue: Int, newLeftChild: Option[NodeState], newRightChild: Option[NodeState]) = {
+  private def spawnRightChild(newValue: Int, newLeftChild: Option[BinaryTree.Node], newRightChild: Option[BinaryTree.Node]) = {
     context.spawn(BinaryTree.right(newValue, parent = Some(context.self), newLeftChild, newRightChild), "right")
   }
 
-  private def spawnLeftChild(newValue: Int, newLeftChild: Option[NodeState], newRightChild: Option[NodeState]) = {
+  private def spawnLeftChild(newValue: Int, newLeftChild: Option[BinaryTree.Node], newRightChild: Option[BinaryTree.Node]) = {
     context.spawn(BinaryTree.left(newValue, parent = Some(context.self), newLeftChild, newRightChild), "left")
   }
 }

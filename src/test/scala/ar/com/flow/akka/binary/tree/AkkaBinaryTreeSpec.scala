@@ -55,8 +55,8 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
     }
     "have Left child path" in {
       val treeActor = BinaryTree(value = 1,
-        leftChild = Some(NodeState(2, None, None)),
-        rightChild = Some(NodeState(3, None, None))
+        leftChild = Some(Node(2, None, None)),
+        rightChild = Some(Node(3, None, None))
       )
 
       val tree = spawn(treeActor)
@@ -71,8 +71,8 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
     }
     "have Left/Left child path" in {
       val treeBehavior = BinaryTree(value = 1,
-        leftChild = Some(NodeState(2,
-          leftChild = Some(NodeState(3, None, None)),
+        leftChild = Some(Node(2,
+          leftChild = Some(Node(3, None, None)),
           rightChild = None)),
         rightChild = None)
 
@@ -91,9 +91,9 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
     }
     "have Left/right child path" in {
       val treeBehavior = BinaryTree(value = 1,
-        leftChild = Some(NodeState(2,
+        leftChild = Some(Node(2,
           leftChild = None,
-          rightChild = Some(NodeState(3, None, None)),
+          rightChild = Some(Node(3, None, None)),
         )),
         rightChild = None)
 
@@ -122,8 +122,8 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
   "A Child Node" must {
     "have parent" in {
       val treeBehavior = BinaryTree(value = 1,
-        leftChild = Some(NodeState(2, None, None)),
-        rightChild = Some(NodeState(3, None, None))
+        leftChild = Some(Node(2, None, None)),
+        rightChild = Some(Node(3, None, None))
       )
 
       val tree = spawn(treeBehavior)
@@ -135,8 +135,8 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
   "A Binary Tree" must {
     "construct with Left and Right children" in {
       val treeBehavior = BinaryTree(value = 1,
-        leftChild = Some(NodeState(2, None, None)),
-        rightChild = Some(NodeState(3, None, None))
+        leftChild = Some(Node(2, None, None)),
+        rightChild = Some(Node(3, None, None))
       )
 
       val tree = spawn(treeBehavior)
