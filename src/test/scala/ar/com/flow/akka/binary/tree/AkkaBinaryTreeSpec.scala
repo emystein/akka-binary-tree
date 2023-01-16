@@ -8,48 +8,48 @@ import org.scalatest.wordspec.AnyWordSpecLike
 class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike {
   "A Leaf" must {
     "have depth equal to 0" in {
-      val replyProbe = createTestProbe[DepthReturned]()
+      val replyProbe = createTestProbe[ReturnedDepth]()
       val tree = spawn(BinaryTree())
       tree ! Depth(replyProbe.ref)
-      replyProbe.expectMessage(DepthReturned(1))
+      replyProbe.expectMessage(ReturnedDepth(1))
     }
     "not have Left child" in {
-      val replyProbe = createTestProbe[NodeReturned]()
+      val replyProbe = createTestProbe[ReturnedNode]()
       val tree = spawn(BinaryTree())
       tree ! LeftChild(replyProbe.ref)
-      replyProbe.expectMessage(NodeReturned(None))
+      replyProbe.expectMessage(ReturnedNode(None))
     }
     "not have Right child" in {
-      val replyProbe = createTestProbe[NodeReturned]()
+      val replyProbe = createTestProbe[ReturnedNode]()
       val tree = spawn(BinaryTree())
       tree ! RightChild(replyProbe.ref)
-      replyProbe.expectMessage(NodeReturned(None))
+      replyProbe.expectMessage(ReturnedNode(None))
     }
     "not have parent" in {
-      val replyProbe = createTestProbe[NodeReturned]()
+      val replyProbe = createTestProbe[ReturnedNode]()
       val tree = spawn(BinaryTree())
       tree ! Parent(replyProbe.ref)
-      replyProbe.expectMessage(NodeReturned(None))
+      replyProbe.expectMessage(ReturnedNode(None))
     }
   }
   "A Node" must {
     "have value" in {
-      val replyProbe = createTestProbe[ValueReturned]()
+      val replyProbe = createTestProbe[ReturnedValue]()
       val tree = spawn(BinaryTree(value=1))
       tree ! Value(replyProbe.ref)
-      replyProbe.expectMessage(ValueReturned(1))
+      replyProbe.expectMessage(ReturnedValue(1))
     }
     "have added Left child" in {
       val tree = spawn(BinaryTree(value = 1))
 
-      val replyProbe = createTestProbe[NodeReturned]()
+      val replyProbe = createTestProbe[ReturnedNode]()
       tree ! AddLeftChild(replyProbe.ref, value = 2, leftChild=None, rightChild = None)
       expectLeftValue(tree, 2)
     }
     "have added Right child" in {
       val tree = spawn(BinaryTree(value = 1))
 
-      val replyProbe = createTestProbe[NodeReturned]()
+      val replyProbe = createTestProbe[ReturnedNode]()
       tree ! AddRightChild(replyProbe.ref, value = 3, leftChild = None, rightChild = None)
       expectRightValue(tree, 3)
     }
@@ -61,7 +61,7 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
 
       val tree = spawn(treeActor)
 
-      val nodeReplyProbe = createTestProbe[NodeReturned]()
+      val nodeReplyProbe = createTestProbe[ReturnedNode]()
       tree ! LeftChild(nodeReplyProbe.ref)
       val leftChild = nodeReplyProbe.receiveMessage()
 
@@ -78,7 +78,7 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
 
       val tree = spawn(treeBehavior)
 
-      val nodeReply = createTestProbe[NodeReturned]()
+      val nodeReply = createTestProbe[ReturnedNode]()
       tree ! LeftChild(nodeReply.ref)
       val leftChild = nodeReply.receiveMessage()
 
@@ -99,7 +99,7 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
 
       val tree = spawn(treeBehavior)
 
-      val nodeReply = createTestProbe[NodeReturned]()
+      val nodeReply = createTestProbe[ReturnedNode]()
       tree ! LeftChild(nodeReply.ref)
       val leftChild = nodeReply.receiveMessage()
 
@@ -147,41 +147,41 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
   }
 
   private def expectLeftValue(tree: ActorRef[Command], expectedValue: Int) = {
-    val replyProbe = createTestProbe[NodeReturned]()
+    val replyProbe = createTestProbe[ReturnedNode]()
     val message = LeftChild(replyProbe.ref)
     expectNodeValue(tree, message, replyProbe, expectedValue)
   }
 
   private def expectRightValue(tree: ActorRef[Command], expectedValue: Int) = {
-    val rightChildReplyProbe = createTestProbe[NodeReturned]()
+    val rightChildReplyProbe = createTestProbe[ReturnedNode]()
     val rightChildMessage = RightChild(rightChildReplyProbe.ref)
     expectNodeValue(tree, rightChildMessage, rightChildReplyProbe, expectedValue)
   }
 
-  private def expectNodeValue(tree: ActorRef[Command], childMessage: Command, childReplyProbe: TestProbe[NodeReturned], expectedValue: Int) = {
+  private def expectNodeValue(tree: ActorRef[Command], childMessage: Command, childReplyProbe: TestProbe[ReturnedNode], expectedValue: Int) = {
     tree ! childMessage
     val rightChild = childReplyProbe.receiveMessage()
-    val rightValueReply = createTestProbe[ValueReturned]()
+    val rightValueReply = createTestProbe[ReturnedValue]()
     rightChild.node.get ! Value(rightValueReply.ref)
-    rightValueReply.expectMessage(ValueReturned(expectedValue))
+    rightValueReply.expectMessage(ReturnedValue(expectedValue))
   }
 
   private def expectLeftHasParent(tree: ActorRef[Command]): Unit = {
-    val childReply = createTestProbe[NodeReturned]()
+    val childReply = createTestProbe[ReturnedNode]()
     tree ! LeftChild(childReply.ref)
     expectNodeHasParent(childReply, tree)
   }
 
   private def expectRightHasParent(tree: ActorRef[Command]): Unit = {
-    val childReply = createTestProbe[NodeReturned]()
+    val childReply = createTestProbe[ReturnedNode]()
     tree ! RightChild(childReply.ref)
     expectNodeHasParent(childReply, tree)
   }
 
-  private def expectNodeHasParent(reply: TestProbe[NodeReturned], expectedParent: ActorRef[Command]) = {
+  private def expectNodeHasParent(reply: TestProbe[ReturnedNode], expectedParent: ActorRef[Command]) = {
     val child = reply.receiveMessage().node.get
-    val parentReply = createTestProbe[NodeReturned]()
+    val parentReply = createTestProbe[ReturnedNode]()
     child ! Parent(parentReply.ref)
-    parentReply.expectMessage(NodeReturned(Some(expectedParent)))
+    parentReply.expectMessage(ReturnedNode(Some(expectedParent)))
   }
 }

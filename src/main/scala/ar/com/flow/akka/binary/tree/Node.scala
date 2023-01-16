@@ -39,27 +39,27 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
         treePath ! TreePath(replyTo, this.parent, this.name, collectedPath)
         this
       case Depth(replyTo) =>
-        replyTo ! DepthReturned(1)
+        replyTo ! ReturnedDepth(1)
         this
       case Parent(replyTo) =>
-        replyTo ! NodeReturned(parent)
+        replyTo ! ReturnedNode(parent)
         this
       case AddLeftChild(replyTo, newValue, newLeftChild, newRightChild) =>
         leftChild = Some(spawnLeftChild(newValue, newLeftChild, newRightChild))
-        replyTo ! NodeReturned(leftChild)
+        replyTo ! ReturnedNode(leftChild)
         this
       case LeftChild(replyTo) =>
-        replyTo ! NodeReturned(leftChild)
+        replyTo ! ReturnedNode(leftChild)
         this
       case AddRightChild(replyTo, newValue, newLeftChild, newRightChild) =>
         rightChild = Some(spawnRightChild(newValue, newLeftChild, newRightChild))
-        replyTo ! NodeReturned(rightChild)
+        replyTo ! ReturnedNode(rightChild)
         this
       case RightChild(replyTo) =>
-        replyTo ! NodeReturned(rightChild)
+        replyTo ! ReturnedNode(rightChild)
         this
       case Value(replyTo) =>
-        replyTo ! ValueReturned(value)
+        replyTo ! ReturnedValue(value)
         this
     }
   }
