@@ -64,11 +64,11 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
     }
   }
 
-  private def spawnRightChild(newValue: Int, newLeftChild: Option[BinaryTree.Node], newRightChild: Option[BinaryTree.Node]) = {
-    context.spawn(BinaryTree.right(newValue, parent = Some(context.self), newLeftChild, newRightChild), "right")
+  private def spawnRightChild(value: Int, leftChild: Option[BinaryTree.Node], rightChild: Option[BinaryTree.Node]) = {
+    context.spawn(BinaryTree.right(value, parent = Some(context.self), leftChild, rightChild), "right")
   }
 
-  private def spawnLeftChild(newValue: Int, newLeftChild: Option[BinaryTree.Node], newRightChild: Option[BinaryTree.Node]) = {
-    context.spawn(BinaryTree.left(newValue, parent = Some(context.self), newLeftChild, newRightChild), "left")
+  private def spawnLeftChild(value: Int, leftChild: Option[BinaryTree.Node], rightChild: Option[BinaryTree.Node]) = {
+    context.spawn(BinaryTree.left(value, parent = Some(context.self), leftChild, rightChild), "left")
   }
 }
