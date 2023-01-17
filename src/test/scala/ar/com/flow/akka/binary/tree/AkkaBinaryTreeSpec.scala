@@ -65,9 +65,9 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
       tree ! LeftChild(nodeReplyProbe.ref)
       val leftChild = nodeReplyProbe.receiveMessage()
 
-      val pathReply = createTestProbe[PathReturned]()
+      val pathReply = createTestProbe[ReturnedPath]()
       leftChild.node.get ! Path(pathReply.ref)
-      pathReply.expectMessage(PathReturned("/left"))
+      pathReply.expectMessage(ReturnedPath("/left"))
     }
     "have Left/Left child path" in {
       val treeBehavior = BinaryTree(value = 1,
@@ -85,9 +85,9 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
       leftChild.node.get ! LeftChild(nodeReply.ref)
       val leftLeftChild = nodeReply.receiveMessage()
 
-      val pathReply = createTestProbe[PathReturned]()
+      val pathReply = createTestProbe[ReturnedPath]()
       leftLeftChild.node.get ! Path(pathReply.ref)
-      pathReply.expectMessage(PathReturned("/left/left"))
+      pathReply.expectMessage(ReturnedPath("/left/left"))
     }
     "have Left/right child path" in {
       val treeBehavior = BinaryTree(value = 1,
@@ -106,17 +106,17 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
       leftChild.node.get ! RightChild(nodeReply.ref)
       val leftRightChild = nodeReply.receiveMessage()
 
-      val pathReply = createTestProbe[PathReturned]()
+      val pathReply = createTestProbe[ReturnedPath]()
       leftRightChild.node.get ! Path(pathReply.ref)
-      pathReply.expectMessage(PathReturned("/left/right"))
+      pathReply.expectMessage(ReturnedPath("/left/right"))
     }
   }
   "The Root Node" must {
     "have / path" in {
       val tree = spawn(BinaryTree(value = 1))
-      val pathReply = createTestProbe[PathReturned]()
+      val pathReply = createTestProbe[ReturnedPath]()
       tree ! Path(pathReply.ref)
-      pathReply.expectMessage(PathReturned("/"))
+      pathReply.expectMessage(ReturnedPath("/"))
     }
   }
   "A Child Node" must {

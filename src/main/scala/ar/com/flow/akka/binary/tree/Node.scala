@@ -3,7 +3,6 @@ package ar.com.flow.akka.binary.tree
 import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext}
 import akka.actor.typed.{ActorRef, Behavior}
 import ar.com.flow.akka.binary.tree.BinaryTree._
-import ar.com.flow.akka.binary.tree.BinaryTreePath.TreePath
 
 object LeftNode {
   def apply(context: ActorContext[BinaryTree.Command], value: Int = 0,
@@ -35,8 +34,7 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
   override def onMessage(message: BinaryTree.Command): Behavior[BinaryTree.Command] = {
     message match {
       case Path(replyTo, collectedPath) =>
-        val treePath = context.spawn(BinaryTreePath(), "path")
-        treePath ! TreePath(replyTo, this.parent, this.name, collectedPath)
+        pathCalculator ! BinaryTreePath.Path(replyTo, this.parent, this.name, collectedPath)
         this
       case Depth(replyTo) =>
         replyTo ! ReturnedDepth(1)
@@ -70,5 +68,9 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
 
   private def spawnRightChild(rightChild: BinaryTree.Node) = {
     context.spawn(BinaryTree.right(rightChild.value, parent = Some(context.self), rightChild.leftChild, rightChild.rightChild), "right")
+  }
+
+  private def pathCalculator = {
+    context.spawn(BinaryTreePath(), "path")
   }
 }

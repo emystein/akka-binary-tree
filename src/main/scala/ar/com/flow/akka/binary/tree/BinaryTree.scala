@@ -16,8 +16,8 @@ object BinaryTree {
   final case class Value(replyTo: ActorRef[ReturnedValue]) extends Command
   final case class ReturnedValue(value: Int) extends Command
 
-  final case class Path(replyTo: ActorRef[PathReturned], collectedPath: Option[String] = None) extends Command
-  final case class PathReturned(path: String) extends Command
+  final case class Path(replyTo: ActorRef[ReturnedPath], collectedPath: Option[String] = None) extends Command
+  final case class ReturnedPath(path: String) extends Command
 
   final case class Depth(replyTo: ActorRef[ReturnedDepth]) extends Command
   final case class ReturnedDepth(depth: Int) extends Command
