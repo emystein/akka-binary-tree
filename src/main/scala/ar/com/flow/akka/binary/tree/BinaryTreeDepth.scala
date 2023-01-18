@@ -11,12 +11,12 @@ object BinaryTreeDepth {
   final case class LeftDepth(replyTo: ActorRef[Command],
                              leftChild: Option[ActorRef[Command]] = None) extends Command
 
-  final case class ReturnedLeftDepth(depth: Int = 0) extends Command
+  final case class ReachedLeftLeaf() extends Command
 
   final case class RightDepth(replyTo: ActorRef[Command],
                               rightChild: Option[ActorRef[Command]] = None) extends Command
 
-  final case class ReturnedRightDepth(depth: Int = 0) extends Command
+  final case class ReachedRightLeaf() extends Command
 
   def apply(replyTo: ActorRef[BinaryTree.ReturnedDepth],
             leftChild: Option[ActorRef[Command]] = None,
@@ -30,13 +30,13 @@ class BinaryTreeDepth(context: ActorContext[Command],
                       rightChild: Option[ActorRef[Command]])
   extends AbstractBehavior[Command](context) {
 
-  private var leftChildDepth: Option[Int] = None
-  private var rightChildDepth: Option[Int] = None
+  private var atLeftLeaf: Boolean = false
+  private var atRightLeaf: Boolean = false
 
   private def nextBehavior(): Behavior[Command] =
-    (leftChildDepth, rightChildDepth) match {
-      case (Some(ld), Some(rd)) =>
-        replyTo ! ReturnedDepth(Math.max(ld, rd))
+    (atLeftLeaf, atRightLeaf) match {
+      case (true, true) =>
+        replyTo ! ReturnedDepth(0)
         Behaviors.stopped
       case _ =>
         Behaviors.same
@@ -49,22 +49,22 @@ class BinaryTreeDepth(context: ActorContext[Command],
         context.self ! RightDepth(context.self, rightChild)
         nextBehavior()
       case LeftDepth(replyTo, None) =>
-        replyTo ! ReturnedLeftDepth(0)
+        replyTo ! ReachedLeftLeaf()
         nextBehavior()
       case LeftDepth(replyTo, Some(leftChild)) =>
         leftChild ! BinaryTree.Depth(replyTo)
         nextBehavior()
       case RightDepth(replyTo, None) =>
-        replyTo ! ReturnedRightDepth(0)
+        replyTo ! ReachedRightLeaf()
         nextBehavior()
       case RightDepth(replyTo, Some(rightChild)) =>
         rightChild ! BinaryTree.Depth(replyTo)
         nextBehavior()
-      case ReturnedLeftDepth(value) =>
-        leftChildDepth = Some(value)
+      case ReachedLeftLeaf() =>
+        atLeftLeaf = true
         nextBehavior()
-      case ReturnedRightDepth(value) =>
-        rightChildDepth = Some(value)
+      case ReachedRightLeaf() =>
+        atRightLeaf = true
         nextBehavior()
       case ReturnedDepth(value) =>
         replyTo ! ReturnedDepth(1 + value)
