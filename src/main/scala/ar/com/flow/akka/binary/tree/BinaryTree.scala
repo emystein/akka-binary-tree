@@ -2,6 +2,7 @@ package ar.com.flow.akka.binary.tree
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
+import ar.com.flow.akka.binary.tree.BinaryTreeDepth.ReturnedDepth
 
 object BinaryTree {
   trait Command
@@ -20,7 +21,6 @@ object BinaryTree {
   final case class ReturnedPath(path: String) extends Command
 
   final case class Depth(replyTo: ActorRef[ReturnedDepth]) extends Command
-  final case class ReturnedDepth(depth: Int) extends Command
 
   final case class Node(value: Int, leftChild: Option[Node] = None, rightChild: Option[Node] = None)
 

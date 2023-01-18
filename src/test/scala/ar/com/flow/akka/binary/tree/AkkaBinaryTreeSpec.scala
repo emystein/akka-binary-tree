@@ -3,6 +3,7 @@ package ar.com.flow.akka.binary.tree
 import akka.actor.testkit.typed.scaladsl.{ScalaTestWithActorTestKit, TestProbe}
 import akka.actor.typed.ActorRef
 import ar.com.flow.akka.binary.tree.BinaryTree._
+import ar.com.flow.akka.binary.tree.BinaryTreeDepth.ReturnedDepth
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike {
