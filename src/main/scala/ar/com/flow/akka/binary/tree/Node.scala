@@ -37,7 +37,7 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
         pathCalculator ! BinaryTreePath.Path(replyTo, this.parent, this.name, collectedPath)
         this
       case Depth(replyTo) =>
-        replyTo ! ReturnedDepth(1)
+        depthCalculator(replyTo) ! BinaryTreeDepth.Depth()
         this
       case Parent(replyTo) =>
         replyTo ! ReturnedNode(parent)
@@ -72,5 +72,9 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
 
   private def pathCalculator = {
     context.spawn(BinaryTreePath(), "path")
+  }
+
+  private def depthCalculator(replyTo: ActorRef[ReturnedDepth]) = {
+    context.spawn(BinaryTreeDepth(replyTo, leftChild, rightChild), "path")
   }
 }

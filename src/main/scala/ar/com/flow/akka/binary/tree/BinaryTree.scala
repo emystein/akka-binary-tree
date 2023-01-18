@@ -4,7 +4,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
 
 object BinaryTree {
-  sealed trait Command
+  trait Command
 
   final case class Parent(replyTo: ActorRef[ReturnedNode]) extends Command
   final case class AddLeftChild(replyTo: ActorRef[ReturnedNode], leftChild: Node) extends Command

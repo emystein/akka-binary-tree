@@ -3,76 +3,57 @@ package ar.com.flow.akka.binary.tree
 import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 import ar.com.flow.akka.binary.tree.BinaryTree.ReturnedDepth
-import ar.com.flow.akka.binary.tree.BinaryTreeDepth.{Command, LeftDepth, ReturnedLeftDepth, ReturnedRightDepth, RightDepth}
+import ar.com.flow.akka.binary.tree.BinaryTreeDepth._
 
 object BinaryTreeDepth {
-  sealed trait Command
+  final case class Depth() extends BinaryTree.Command
 
-  final case class Depth(replyTo: ActorRef[ReturnedDepth],
-                         leftChild: Option[ActorRef[BinaryTree.Command]] = None,
-                         rightChild: Option[ActorRef[BinaryTree.Command]] = None,
-                         collectedDepth: Int = 0
-                        ) extends Command
-  final case class LeftDepth(replyTo: ActorRef[ReturnedLeftDepth],
-                             leftChild: Option[ActorRef[BinaryTree.Command]] = None) extends Command
-  final case class ReturnedLeftDepth(depth: Int = 0) extends Command
-  final case class RightDepth(replyTo: ActorRef[ReturnedRightDepth],
-                              rightChild: Option[ActorRef[BinaryTree.Command]] = None) extends Command
-  final case class ReturnedRightDepth(depth: Int = 0) extends Command
+  final case class ReturnedLeftDepth(depth: Int = 0) extends BinaryTree.Command
 
-  def apply(replyTo: ActorRef[BinaryTree.Command],
+  final case class ReturnedRightDepth(depth: Int = 0) extends BinaryTree.Command
+
+  def apply(replyTo: ActorRef[BinaryTree.ReturnedDepth],
             leftChild: Option[ActorRef[BinaryTree.Command]] = None,
-            rightChild: Option[ActorRef[BinaryTree.Command]] = None): Behavior[Command] =
+            rightChild: Option[ActorRef[BinaryTree.Command]] = None): Behavior[BinaryTree.Command] =
     Behaviors.setup(context => new BinaryTreeDepth(context, replyTo, leftChild, rightChild))
 }
 
-class BinaryTreeDepth(context: ActorContext[Command],
-                      replyTo: ActorRef[BinaryTree.Command],
+class BinaryTreeDepth(context: ActorContext[BinaryTree.Command],
+                      replyTo: ActorRef[BinaryTree.ReturnedDepth],
                       leftChild: Option[ActorRef[BinaryTree.Command]],
                       rightChild: Option[ActorRef[BinaryTree.Command]]
                      )
-  extends AbstractBehavior[Command](context) {
+  extends AbstractBehavior[BinaryTree.Command](context) {
 
-  val leftChildDepthCalculator: ActorRef[Command] = context.spawn(BinaryTreeDepth(replyTo, leftChild, None), "left-depth")
-  val rightChildDepthCalculator: ActorRef[Command] = context.spawn(BinaryTreeDepth(replyTo, None, rightChild), "right-depth")
+  private var leftChildDepth: Option[Int] = None
+  private var rightChildDepth: Option[Int] = None
 
-  var leftChildDepth: Option[Int] = None
-  var rightChildDepth: Option[Int] = None
-
-  leftChildDepthCalculator ! LeftDepth(context.self)
-  rightChildDepthCalculator ! RightDepth(context.self)
-
-  def nextBehavior(): Behavior[Command] =
+  private def nextBehavior(): Behavior[BinaryTree.Command] =
     (leftChildDepth, rightChildDepth) match {
       case (Some(ld), Some(rd)) =>
-        replyTo ! ReturnedDepth(Math.max(ld, rd))
+        replyTo ! ReturnedDepth(1 + Math.max(ld, rd))
         Behaviors.stopped
       case _ =>
         Behaviors.same
     }
 
-  override def onMessage(message: Command): Behavior[Command] = {
+  override def onMessage(message: BinaryTree.Command): Behavior[BinaryTree.Command] = {
     message match {
-//      case Depth(replyTo, None, None, collectedDepth) =>
-//        replyTo ! ReturnedDepth(collectedDepth + 1)
-//        this
-//      case Depth(replyTo, Some(leftChild), None, collectedDepth) =>
-//        context.self ! Depth(replyTo, )
-//        this
-//      case Depth(replyTo, None, Some(rightChild), collectedDepth) =>
-//        parent ! BinaryTree.Depth(replyTo, Some(s"$name"))
-//        this
-//      case Depth(replyTo, Some(leftChile), Some(rightChild), collectedDepth) =>
-//        parent ! BinaryTree.Depth(replyTo, Some(s"$name"))
-//        this
+      case Depth() =>
+        val leftDepthCalculator = context.spawn(BranchDepth(), "left-depth")
+        leftDepthCalculator ! BranchDepth.LeftDepth(context.self, leftChild)
+        val rightDepthCalculator = context.spawn(BranchDepth(), "right-depth")
+        rightDepthCalculator ! BranchDepth.RightDepth(context.self, rightChild)
+        nextBehavior()
       case ReturnedLeftDepth(value) =>
         leftChildDepth = Some(value)
         nextBehavior()
       case ReturnedRightDepth(value) =>
         rightChildDepth = Some(value)
         nextBehavior()
-      case _ =>
-        Behaviors.unhandled
+      case ReturnedDepth(value) =>
+        replyTo ! ReturnedDepth(1 + value)
+        Behaviors.stopped
     }
   }
 }

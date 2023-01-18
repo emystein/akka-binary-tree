@@ -7,12 +7,6 @@ import org.scalatest.wordspec.AnyWordSpecLike
 
 class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike {
   "A Leaf" must {
-    "have depth equal to 0" in {
-      val replyProbe = createTestProbe[ReturnedDepth]()
-      val tree = spawn(BinaryTree())
-      tree ! Depth(replyProbe.ref)
-      replyProbe.expectMessage(ReturnedDepth(1))
-    }
     "not have Left child" in {
       val replyProbe = createTestProbe[ReturnedNode]()
       val tree = spawn(BinaryTree())
@@ -111,12 +105,32 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
       pathReply.expectMessage(ReturnedPath("/left/right"))
     }
   }
+  "A Node with only one child" must {
+    "have depth equal to 2" in {
+      val treeActor = BinaryTree(value = 1,
+        leftChild = Some(Leaf(value = 2)),
+        rightChild = None
+      )
+
+      val tree = spawn(treeActor)
+
+      val replyProbe = createTestProbe[ReturnedDepth]()
+      tree ! Depth(replyProbe.ref)
+      replyProbe.expectMessage(ReturnedDepth(2))
+    }
+  }
   "The Root Node" must {
     "have / path" in {
       val tree = spawn(BinaryTree(value = 1))
       val pathReply = createTestProbe[ReturnedPath]()
       tree ! Path(pathReply.ref)
       pathReply.expectMessage(ReturnedPath("/"))
+    }
+    "have depth equal to 1" in {
+      val replyProbe = createTestProbe[ReturnedDepth]()
+      val tree = spawn(BinaryTree(value = 1))
+      tree ! Depth(replyProbe.ref)
+      replyProbe.expectMessage(ReturnedDepth(1))
     }
   }
   "A Child Node" must {
