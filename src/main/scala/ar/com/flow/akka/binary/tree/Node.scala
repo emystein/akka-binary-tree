@@ -63,19 +63,19 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
     }
   }
 
-  private def spawnLeftChild(leftChild: BinaryTree.Node) = {
+  private def spawnLeftChild(leftChild: BinaryTree.Node): ActorRef[Command] = {
     context.spawn(BinaryTree.left(leftChild.value, parent = Some(context.self), leftChild.leftChild, leftChild.rightChild), "left")
   }
 
-  private def spawnRightChild(rightChild: BinaryTree.Node) = {
+  private def spawnRightChild(rightChild: BinaryTree.Node): ActorRef[Command] = {
     context.spawn(BinaryTree.right(rightChild.value, parent = Some(context.self), rightChild.leftChild, rightChild.rightChild), "right")
   }
 
-  private def pathCalculator = {
+  private def pathCalculator: ActorRef[BinaryTreePath.Command] = {
     context.spawn(BinaryTreePath(), "path")
   }
 
-  private def depthCalculator(replyTo: ActorRef[ReturnedDepth]) = {
+  private def depthCalculator(replyTo: ActorRef[ReturnedDepth]): ActorRef[Command] = {
     context.spawn(BinaryTreeDepth(replyTo, leftChild, rightChild), "path")
   }
 }

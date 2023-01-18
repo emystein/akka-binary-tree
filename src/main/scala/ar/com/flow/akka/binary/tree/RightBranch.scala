@@ -10,8 +10,7 @@ object RightBranch {
   final case class Depth(replyTo: ActorRef[Command],
                          rightChild: Option[ActorRef[Command]] = None) extends Command
 
-  def apply(): Behavior[Command] =
-    Behaviors.setup(context => new RightBranch(context))
+  def apply(): Behavior[Command] = Behaviors.setup(context => new RightBranch(context))
 }
 
 class RightBranch(context: ActorContext[Command]) extends AbstractBehavior[Command](context) {

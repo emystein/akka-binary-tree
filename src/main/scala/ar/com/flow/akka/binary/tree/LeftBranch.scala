@@ -11,8 +11,7 @@ object LeftBranch {
                          leftChild: Option[ActorRef[Command]] = None) extends Command
 
 
-  def apply(): Behavior[Command] =
-    Behaviors.setup(context => new LeftBranch(context))
+  def apply(): Behavior[Command] = Behaviors.setup(context => new LeftBranch(context))
 }
 
 class LeftBranch(context: ActorContext[Command]) extends AbstractBehavior[Command](context) {
