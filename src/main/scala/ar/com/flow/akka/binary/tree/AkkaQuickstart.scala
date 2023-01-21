@@ -2,9 +2,7 @@
 package ar.com.flow.akka.binary.tree
 
 
-import akka.actor.typed.ActorRef
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.Behavior
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import ar.com.flow.akka.binary.tree.GreeterMain.SayHello
 

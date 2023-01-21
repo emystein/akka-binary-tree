@@ -43,8 +43,8 @@ class BinaryTreeHeight(context: ActorContext[Command],
       case Height(replyTo, accumulatedHeight) =>
         this.replyTo = replyTo
         this.accumulatedHeight = accumulatedHeight
-        leftBranch ! LeftBranch.Height(context.self, leftChild, accumulatedHeight)
-        rightBranch ! RightBranch.Height(context.self, rightChild, accumulatedHeight)
+        leftBranch ! Branch.Height(context.self, leftChild, accumulatedHeight)
+        rightBranch ! Branch.Height(context.self, rightChild, accumulatedHeight)
         nextBehavior()
       case ReachedLeftLeaf(accumulatedHeight) =>
         this.leftHeight = Some(accumulatedHeight)
@@ -65,4 +65,36 @@ class BinaryTreeHeight(context: ActorContext[Command],
   private def rightBranch: ActorRef[Command] = {
     context.spawn(RightBranch(), "right-height")
   }
+}
+
+object Branch {
+  final case class Height(replyTo: ActorRef[Command],
+                          child: Option[ActorRef[Command]] = None,
+                          accumulatedHeight: Int) extends Command
+
+}
+
+class Branch(context: ActorContext[Command], heightReply: Int => Command) extends AbstractBehavior[Command](context) {
+  override def onMessage(message: Command): Behavior[Command] = {
+    message match {
+      case Branch.Height(replyTo, None, accumulatedHeight) =>
+        replyTo ! this.heightReply(accumulatedHeight)
+        this
+      case Branch.Height(replyTo, Some(leftChild), accumulatedHeight) =>
+        leftChild ! BinaryTree.Height(replyTo, accumulatedHeight + 1)
+        this
+    }
+  }
+}
+
+object LeftBranch {
+  private def leafReply: Int => ReachedLeftLeaf = height => ReachedLeftLeaf(height)
+
+  def apply(): Behavior[Command] = Behaviors.setup(context => new Branch(context, leafReply))
+}
+
+object RightBranch {
+  private def leafReply: Int => ReachedRightLeaf = height => ReachedRightLeaf(height)
+
+  def apply(): Behavior[Command] = Behaviors.setup(context => new Branch(context, leafReply))
 }

@@ -3,7 +3,6 @@ package ar.com.flow.akka.binary.tree
 import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext}
 import akka.actor.typed.{ActorRef, Behavior}
 import ar.com.flow.akka.binary.tree.BinaryTree._
-import ar.com.flow.akka.binary.tree.BinaryTreeHeight.ReturnedHeight
 
 object LeftNode {
   def apply(context: ActorContext[BinaryTree.Command], value: Int = 0,
