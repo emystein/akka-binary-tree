@@ -25,14 +25,13 @@ class BinaryTreeHeight(context: ActorContext[Command],
   extends AbstractBehavior[Command](context) {
 
   private var replyTo: ActorRef[ReturnedHeight] = context.self
-  private var accumulatedHeight: Int = 0
   private var leftHeight: Option[Int] = None
   private var rightHeight: Option[Int] = None
 
   private def nextBehavior(): Behavior[Command] =
     (leftHeight, rightHeight) match {
       case (Some(leftValue), Some(rightValue)) =>
-        replyTo ! ReturnedHeight(Math.max(1, accumulatedHeight + Math.max(leftValue, rightValue)))
+        this.replyTo ! ReturnedHeight(Math.max(leftValue, rightValue))
         Behaviors.stopped
       case _ =>
         Behaviors.same
@@ -42,7 +41,6 @@ class BinaryTreeHeight(context: ActorContext[Command],
     message match {
       case Height(replyTo, accumulatedHeight) =>
         this.replyTo = replyTo
-        this.accumulatedHeight = accumulatedHeight
         leftBranch ! Branch.Height(replyTo = context.self, leftChild, accumulatedHeight)
         rightBranch ! Branch.Height(replyTo = context.self, rightChild, accumulatedHeight)
         nextBehavior()
@@ -78,7 +76,7 @@ class Branch(context: ActorContext[Command], heightReply: Int => Command) extend
   override def onMessage(message: Command): Behavior[Command] = {
     message match {
       case Branch.Height(replyTo, None, accumulatedHeight) =>
-        replyTo ! this.heightReply(accumulatedHeight)
+        replyTo ! this.heightReply(accumulatedHeight + 1)
         this
       case Branch.Height(replyTo, Some(node), accumulatedHeight) =>
         node ! BinaryTree.Height(replyTo, accumulatedHeight + 1)
