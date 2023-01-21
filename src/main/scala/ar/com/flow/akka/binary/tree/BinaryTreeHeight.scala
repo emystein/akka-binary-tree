@@ -88,13 +88,13 @@ class Branch(context: ActorContext[Command], heightReply: Int => Command) extend
 }
 
 object LeftBranch {
-  private def leafReply: Int => ReachedLeftLeaf = height => ReachedLeftLeaf(height)
+  def apply(): Behavior[Command] = Behaviors.setup(context => new Branch(context, heightReply))
 
-  def apply(): Behavior[Command] = Behaviors.setup(context => new Branch(context, leafReply))
+  private def heightReply: Int => Command = height => ReachedLeftLeaf(height)
 }
 
 object RightBranch {
-  private def leafReply: Int => ReachedRightLeaf = height => ReachedRightLeaf(height)
+  def apply(): Behavior[Command] = Behaviors.setup(context => new Branch(context, heightReply))
 
-  def apply(): Behavior[Command] = Behaviors.setup(context => new Branch(context, leafReply))
+  private def heightReply: Int => Command = height => ReachedRightLeaf(height)
 }
