@@ -43,8 +43,8 @@ class BinaryTreeHeight(context: ActorContext[Command],
       case Height(replyTo, accumulatedHeight) =>
         this.replyTo = replyTo
         this.accumulatedHeight = accumulatedHeight
-        leftBranch ! Branch.Height(context.self, leftChild, accumulatedHeight)
-        rightBranch ! Branch.Height(context.self, rightChild, accumulatedHeight)
+        leftBranch ! Branch.Height(replyTo = context.self, leftChild, accumulatedHeight)
+        rightBranch ! Branch.Height(replyTo = context.self, rightChild, accumulatedHeight)
         nextBehavior()
       case ReachedLeftLeaf(accumulatedHeight) =>
         this.leftHeight = Some(accumulatedHeight)
@@ -69,7 +69,7 @@ class BinaryTreeHeight(context: ActorContext[Command],
 
 object Branch {
   final case class Height(replyTo: ActorRef[Command],
-                          child: Option[ActorRef[Command]] = None,
+                          node: Option[ActorRef[Command]] = None,
                           accumulatedHeight: Int) extends Command
 
 }
@@ -80,8 +80,8 @@ class Branch(context: ActorContext[Command], heightReply: Int => Command) extend
       case Branch.Height(replyTo, None, accumulatedHeight) =>
         replyTo ! this.heightReply(accumulatedHeight)
         this
-      case Branch.Height(replyTo, Some(leftChild), accumulatedHeight) =>
-        leftChild ! BinaryTree.Height(replyTo, accumulatedHeight + 1)
+      case Branch.Height(replyTo, Some(node), accumulatedHeight) =>
+        node ! BinaryTree.Height(replyTo, accumulatedHeight + 1)
         this
     }
   }
