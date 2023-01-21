@@ -3,7 +3,7 @@ package ar.com.flow.akka.binary.tree
 import akka.actor.testkit.typed.scaladsl.{ScalaTestWithActorTestKit, TestProbe}
 import akka.actor.typed.ActorRef
 import ar.com.flow.akka.binary.tree.BinaryTree._
-import ar.com.flow.akka.binary.tree.BinaryTreeDepth.ReturnedDepth
+import ar.com.flow.akka.binary.tree.BinaryTreeHeight.ReturnedHeight
 import org.scalatest.wordspec.AnyWordSpecLike
 
 class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike {
@@ -107,7 +107,7 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
     }
   }
   "A Node with only one child" must {
-    "have depth equal to 2" in {
+    "have height equal to 2" in {
       val treeActor = BinaryTree(value = 1,
         leftChild = Some(Leaf(value = 2)),
         rightChild = None
@@ -115,9 +115,9 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
 
       val tree = spawn(treeActor)
 
-      val replyProbe = createTestProbe[ReturnedDepth]()
-      tree ! Depth(replyProbe.ref)
-      replyProbe.expectMessage(ReturnedDepth(2))
+      val replyProbe = createTestProbe[ReturnedHeight]()
+      tree ! Height(replyProbe.ref)
+      replyProbe.expectMessage(ReturnedHeight(2))
     }
   }
   "The Root Node" must {
@@ -127,11 +127,11 @@ class AkkaBinaryTreeSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike 
       tree ! Path(pathReply.ref)
       pathReply.expectMessage(ReturnedPath("/"))
     }
-    "have depth equal to 1" in {
-      val replyProbe = createTestProbe[ReturnedDepth]()
+    "have height equal to 1" in {
+      val replyProbe = createTestProbe[ReturnedHeight]()
       val tree = spawn(BinaryTree(value = 1))
-      tree ! Depth(replyProbe.ref)
-      replyProbe.expectMessage(ReturnedDepth(1))
+      tree ! Height(replyProbe.ref)
+      replyProbe.expectMessage(ReturnedHeight(1))
     }
   }
   "A Child Node" must {

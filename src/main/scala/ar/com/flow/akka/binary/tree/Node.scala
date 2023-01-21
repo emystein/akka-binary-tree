@@ -3,7 +3,7 @@ package ar.com.flow.akka.binary.tree
 import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext}
 import akka.actor.typed.{ActorRef, Behavior}
 import ar.com.flow.akka.binary.tree.BinaryTree._
-import ar.com.flow.akka.binary.tree.BinaryTreeDepth.ReturnedDepth
+import ar.com.flow.akka.binary.tree.BinaryTreeHeight.ReturnedHeight
 
 object LeftNode {
   def apply(context: ActorContext[BinaryTree.Command], value: Int = 0,
@@ -37,8 +37,8 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
       case Path(replyTo, collectedPath) =>
         pathCalculator ! BinaryTreePath.Path(replyTo, this.parent, this.name, collectedPath)
         this
-      case Depth(replyTo) =>
-        depthCalculator(replyTo) ! BinaryTreeDepth.Depth()
+      case Height(replyTo) =>
+        depthCalculator(replyTo) ! BinaryTreeHeight.Height()
         this
       case Parent(replyTo) =>
         replyTo ! ReturnedNode(parent)
@@ -75,7 +75,7 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
     context.spawn(BinaryTreePath(), "path")
   }
 
-  private def depthCalculator(replyTo: ActorRef[ReturnedDepth]): ActorRef[Command] = {
-    context.spawn(BinaryTreeDepth(replyTo, leftChild, rightChild), "path")
+  private def depthCalculator(replyTo: ActorRef[ReturnedHeight]): ActorRef[Command] = {
+    context.spawn(BinaryTreeHeight(replyTo, leftChild, rightChild), "path")
   }
 }

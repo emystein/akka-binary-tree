@@ -3,11 +3,11 @@ package ar.com.flow.akka.binary.tree
 import akka.actor.typed.scaladsl.{AbstractBehavior, ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 import ar.com.flow.akka.binary.tree.BinaryTree.Command
-import ar.com.flow.akka.binary.tree.BinaryTreeDepth.ReachedRightLeaf
-import ar.com.flow.akka.binary.tree.RightBranch.Depth
+import ar.com.flow.akka.binary.tree.BinaryTreeHeight.ReachedRightLeaf
+import ar.com.flow.akka.binary.tree.RightBranch.Height
 
 object RightBranch {
-  final case class Depth(replyTo: ActorRef[Command],
+  final case class Height(replyTo: ActorRef[Command],
                          rightChild: Option[ActorRef[Command]] = None) extends Command
 
   def apply(): Behavior[Command] = Behaviors.setup(context => new RightBranch(context))
@@ -16,11 +16,11 @@ object RightBranch {
 class RightBranch(context: ActorContext[Command]) extends AbstractBehavior[Command](context) {
   override def onMessage(message: Command): Behavior[Command] = {
     message match {
-      case Depth(replyTo, None) =>
+      case Height(replyTo, None) =>
         replyTo ! ReachedRightLeaf()
         this
-      case Depth(replyTo, Some(rightChild)) =>
-        rightChild ! BinaryTree.Depth(replyTo)
+      case Height(replyTo, Some(rightChild)) =>
+        rightChild ! BinaryTree.Height(replyTo)
         this
     }
   }
