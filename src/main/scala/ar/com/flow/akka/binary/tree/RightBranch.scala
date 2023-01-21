@@ -8,7 +8,8 @@ import ar.com.flow.akka.binary.tree.RightBranch.Height
 
 object RightBranch {
   final case class Height(replyTo: ActorRef[Command],
-                         rightChild: Option[ActorRef[Command]] = None) extends Command
+                          rightChild: Option[ActorRef[Command]] = None,
+                          accumulatedHeight: Int) extends Command
 
   def apply(): Behavior[Command] = Behaviors.setup(context => new RightBranch(context))
 }
@@ -16,11 +17,11 @@ object RightBranch {
 class RightBranch(context: ActorContext[Command]) extends AbstractBehavior[Command](context) {
   override def onMessage(message: Command): Behavior[Command] = {
     message match {
-      case Height(replyTo, None) =>
-        replyTo ! ReachedRightLeaf()
+      case Height(replyTo, None, accumulatedHeight) =>
+        replyTo ! ReachedRightLeaf(accumulatedHeight)
         this
-      case Height(replyTo, Some(rightChild)) =>
-        rightChild ! BinaryTree.Height(replyTo)
+      case Height(replyTo, Some(rightChild), accumulatedHeight) =>
+        rightChild ! BinaryTree.Height(replyTo, accumulatedHeight + 1)
         this
     }
   }

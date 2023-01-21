@@ -20,7 +20,7 @@ object BinaryTree {
   final case class Path(replyTo: ActorRef[ReturnedPath], collectedPath: Option[String] = None) extends Command
   final case class ReturnedPath(path: String) extends Command
 
-  final case class Height(replyTo: ActorRef[ReturnedHeight]) extends Command
+  final case class Height(replyTo: ActorRef[ReturnedHeight], accumulatedHeight: Int = 0) extends Command
 
   final case class Node(value: Int, leftChild: Option[Node] = None, rightChild: Option[Node] = None)
 
