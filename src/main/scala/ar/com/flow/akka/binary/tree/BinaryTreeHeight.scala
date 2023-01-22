@@ -7,12 +7,9 @@ import ar.com.flow.akka.binary.tree.BinaryTreeHeight._
 
 object BinaryTreeHeight {
   final case class Height(replyTo: ActorRef[ReturnedHeight], accumulatedLeftHeight: Int) extends Command
-
-  final case class ReachedLeftLeaf(height: Int) extends Command
-
-  final case class ReachedRightLeaf(height: Int) extends Command
-
   final case class ReturnedHeight(height: Int) extends Command
+
+  final case class ReachedLeaf(height: Int) extends Command
 
   def apply(leftChild: Option[ActorRef[Command]] = None,
             rightChild: Option[ActorRef[Command]] = None): Behavior[Command] =
@@ -25,16 +22,15 @@ class BinaryTreeHeight(context: ActorContext[Command],
   extends AbstractBehavior[Command](context) {
 
   private var replyTo: ActorRef[ReturnedHeight] = context.self
-  private var leftHeight: Option[Int] = None
-  private var rightHeight: Option[Int] = None
+  private val expectedChildrenHeightCount = 2
+  private var childrenHeights: Seq[Int] = Seq()
 
   private def nextBehavior(): Behavior[Command] =
-    (leftHeight, rightHeight) match {
-      case (Some(leftValue), Some(rightValue)) =>
-        this.replyTo ! ReturnedHeight(Math.max(leftValue, rightValue))
-        Behaviors.stopped
-      case _ =>
-        Behaviors.same
+    if (childrenHeights.size == expectedChildrenHeightCount) {
+      this.replyTo ! ReturnedHeight(childrenHeights.max)
+      Behaviors.stopped
+    } else {
+      Behaviors.same
     }
 
   override def onMessage(message: Command): Behavior[Command] = {
@@ -44,11 +40,8 @@ class BinaryTreeHeight(context: ActorContext[Command],
         leftBranch ! Branch.Height(replyTo = context.self, leftChild, accumulatedHeight)
         rightBranch ! Branch.Height(replyTo = context.self, rightChild, accumulatedHeight)
         nextBehavior()
-      case ReachedLeftLeaf(accumulatedHeight) =>
-        this.leftHeight = Some(accumulatedHeight)
-        nextBehavior()
-      case ReachedRightLeaf(accumulatedHeight) =>
-        this.rightHeight = Some(accumulatedHeight)
+      case ReachedLeaf(accumulatedHeight) =>
+        this.childrenHeights = accumulatedHeight +: this.childrenHeights
         nextBehavior()
       case ReturnedHeight(value) =>
         this.replyTo ! ReturnedHeight(value)
@@ -57,11 +50,11 @@ class BinaryTreeHeight(context: ActorContext[Command],
   }
 
   private def leftBranch: ActorRef[Command] = {
-    context.spawn(LeftBranch(), "left-height")
+    context.spawn(Branch(), "left-height")
   }
 
   private def rightBranch: ActorRef[Command] = {
-    context.spawn(RightBranch(), "right-height")
+    context.spawn(Branch(), "right-height")
   }
 }
 
@@ -70,29 +63,18 @@ object Branch {
                           node: Option[ActorRef[Command]] = None,
                           accumulatedHeight: Int) extends Command
 
+  def apply(): Behavior[Command] = Behaviors.setup(context => new Branch(context))
 }
 
-class Branch(context: ActorContext[Command], heightReply: Int => Command) extends AbstractBehavior[Command](context) {
+class Branch(context: ActorContext[Command]) extends AbstractBehavior[Command](context) {
   override def onMessage(message: Command): Behavior[Command] = {
     message match {
       case Branch.Height(replyTo, None, accumulatedHeight) =>
-        replyTo ! this.heightReply(accumulatedHeight + 1)
+        replyTo ! ReachedLeaf(accumulatedHeight + 1)
         this
       case Branch.Height(replyTo, Some(node), accumulatedHeight) =>
         node ! BinaryTree.Height(replyTo, accumulatedHeight + 1)
         this
     }
   }
-}
-
-object LeftBranch {
-  def apply(): Behavior[Command] = Behaviors.setup(context => new Branch(context, heightReply))
-
-  private def heightReply: Int => Command = height => ReachedLeftLeaf(height)
-}
-
-object RightBranch {
-  def apply(): Behavior[Command] = Behaviors.setup(context => new Branch(context, heightReply))
-
-  private def heightReply: Int => Command = height => ReachedRightLeaf(height)
 }
