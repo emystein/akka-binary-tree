@@ -22,11 +22,10 @@ class BinaryTreeHeight(context: ActorContext[Command],
   extends AbstractBehavior[Command](context) {
 
   private var replyTo: ActorRef[ReturnedHeight] = context.self
-  private val expectedChildrenHeightCount = 2
   private var childrenHeights: Seq[Int] = Seq()
 
   private def nextBehavior(): Behavior[Command] =
-    if (childrenHeights.size == expectedChildrenHeightCount) {
+    if (childrenHeights.size == 2) {
       this.replyTo ! ReturnedHeight(childrenHeights.max)
       Behaviors.stopped
     } else {
