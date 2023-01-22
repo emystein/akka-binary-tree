@@ -6,7 +6,7 @@ import ar.com.flow.akka.binary.tree.BinaryTree.Command
 import ar.com.flow.akka.binary.tree.BinaryTreeHeight._
 
 object BinaryTreeHeight {
-  final case class Height(replyTo: ActorRef[ReturnedHeight], accumulatedLeftHeight: Int) extends Command
+  final case class Height(replyTo: ActorRef[ReturnedHeight], accumulatedHeight: Int) extends Command
   final case class ReturnedHeight(height: Int) extends Command
 
   final case class ReachedLeaf(height: Int) extends Command
