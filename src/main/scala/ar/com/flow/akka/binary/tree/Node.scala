@@ -75,6 +75,6 @@ class NodeBehavior(context: ActorContext[BinaryTree.Command],
   }
 
   private def heightCalculator(): ActorRef[Command] = {
-    context.spawn(BinaryTreeHeight(leftChild, rightChild), "path")
+    context.spawn(BinaryTreeHeight(leftChild, rightChild), "height")
   }
 }
